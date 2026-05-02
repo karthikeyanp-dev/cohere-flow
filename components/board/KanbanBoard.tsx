@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import {
-  DndContext, DragEndEvent, DragOverEvent, DragStartEvent,
-  closestCorners, PointerSensor, useSensor, useSensors, DragOverlay,
+  DndContext, DragEndEvent, DragStartEvent,
+  closestCenter, PointerSensor, useSensor, useSensors, DragOverlay,
 } from '@dnd-kit/core';
 import { Project, Task } from '@/types';
 import Column from './Column';
@@ -21,10 +21,11 @@ interface Props {
 export default function KanbanBoard({ project, tasks, onCreateTask, onUpdateTask, onDeleteTask }: Props) {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [localTasks, setLocalTasks] = useState<Task[]>([]);
+  const displayTasks = tasks;
 
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-  const displayTasks = tasks; // real-time from Firestore
+  const sensors = useSensors(useSensor(PointerSensor, {
+    activationConstraint: { distance: 5 }
+  }));
 
   const getTasksByStage = (stageId: string) =>
     displayTasks.filter((t) => t.status === stageId);
@@ -42,9 +43,7 @@ export default function KanbanBoard({ project, tasks, onCreateTask, onUpdateTask
     const task = displayTasks.find((t) => t.id === active.id);
     if (!task) return;
 
-    // over could be a column id (stage id) or another task id
     let newStatus = over.id as string;
-    // If dropped on a task, get its column
     const overTask = displayTasks.find((t) => t.id === over.id);
     if (overTask) newStatus = overTask.status;
 
@@ -56,9 +55,13 @@ export default function KanbanBoard({ project, tasks, onCreateTask, onUpdateTask
   const sortedStages = [...project.workflow].sort((a, b) => a.order - b.order);
 
   return (
-    <>
-      <DndContext sensors={sensors} collisionDetection={closestCorners}
-        onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <div className="h-full flex flex-col">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <div className="flex gap-4 overflow-x-auto pb-4 flex-1" style={{ minHeight: 0 }}>
           {sortedStages.map((stage) => (
             <Column
@@ -73,11 +76,9 @@ export default function KanbanBoard({ project, tasks, onCreateTask, onUpdateTask
           ))}
         </div>
 
-        <DragOverlay>
+        <DragOverlay dropAnimation={{ duration: 200 }}>
           {activeTask && (
-            <div className="rotate-2 opacity-90">
-              <TaskCard task={activeTask} onClick={() => {}} isDragging />
-            </div>
+            <TaskCard task={activeTask} onClick={() => {}} isDragging />
           )}
         </DragOverlay>
       </DndContext>
@@ -91,6 +92,6 @@ export default function KanbanBoard({ project, tasks, onCreateTask, onUpdateTask
           onDelete={() => { onDeleteTask(selectedTask.id); setSelectedTask(null); }}
         />
       )}
-    </>
+    </div>
   );
 }

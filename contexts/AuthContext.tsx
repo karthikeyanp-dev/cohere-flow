@@ -64,6 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAppUser(null);
       }
       setLoading(false);
+      // Lightweight cookie for middleware route guard (not a security token)
+      if (firebaseUser) {
+        document.cookie = 'cf_session=1; path=/; SameSite=Strict; max-age=86400';
+      } else {
+        document.cookie = 'cf_session=; path=/; SameSite=Strict; max-age=0';
+      }
     });
     return unsubscribe;
   }, []);
@@ -91,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    document.cookie = 'cf_session=; path=/; SameSite=Strict; max-age=0';
     await firebaseSignOut(auth);
   };
 

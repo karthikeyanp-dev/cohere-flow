@@ -46,9 +46,10 @@ export function useTasks(projectId: string) {
 
     // Fire notification if assigned
     if (data.assigneeId && data.assigneeId !== user.uid) {
+      const token = await user.getIdToken();
       await fetch('/api/notifications/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           recipientId: data.assigneeId,
           taskId: ref.id,
@@ -68,9 +69,10 @@ export function useTasks(projectId: string) {
     });
     // Notify on re-assignment
     if (data.assigneeId && data.assigneeId !== prevAssigneeId && data.assigneeId !== user.uid) {
+      const token = await user.getIdToken();
       await fetch('/api/notifications/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           recipientId: data.assigneeId,
           taskId,

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProjects } from '@/hooks/useProjects';
 import Link from 'next/link';
 import { FolderKanban, Plus, Loader2, ArrowRight, Users2 } from 'lucide-react';
+import EmptyState from '@/components/layout/EmptyState';
 
 export default function DashboardPage() {
   const { appUser, role } = useAuth();
@@ -60,31 +61,26 @@ export default function DashboardPage() {
       )}
 
       {/* Empty state */}
-      {activeProjects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 rounded-2xl text-center"
-             style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border)' }}>
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-               style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)' }}>
-            <FolderKanban size={28} style={{ color: '#6366f1' }}/>
-          </div>
-          <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-            {role === 'admin' ? 'Create your first project' : 'No projects assigned yet'}
-          </h2>
-          <p className="text-sm max-w-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-            {role === 'admin'
-              ? 'Set up a project, configure your workflow, and invite your team.'
-              : 'Ask your admin to invite you to a project to get started.'}
-          </p>
-          {role === 'admin' && (
+      {activeProjects.length === 0 && (
+        <EmptyState
+          icon={FolderKanban}
+          title={role === 'admin' ? 'Create your first project' : 'No projects assigned yet'}
+          description={role === 'admin'
+            ? 'Set up a project, configure your workflow, and invite your team to get started.'
+            : 'Ask your admin to invite you to a project to see your tasks and progress.'
+          }
+          action={role === 'admin' ? (
             <Link href="/admin/projects"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all hover:opacity-90"
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:opacity-90 glow-brand"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white' }}>
-              <Plus size={16}/> Create Project
+              <Plus size={18}/> Create Project
             </Link>
-          )}
-        </div>
-      ) : (
-        <div>
+          ) : null}
+        />
+      )}
+      
+      {activeProjects.length > 0 && (
+        <>
           <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
             YOUR PROJECTS
           </h2>
@@ -120,7 +116,7 @@ export default function DashboardPage() {
               </Link>
             ))}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

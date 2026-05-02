@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client';
+import { collection, getDocs } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase/client';
 import { AppUser } from '@/types';
 import { Loader2, ShieldCheck, User } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
@@ -20,11 +20,18 @@ export default function AdminUsersPage() {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  const toggleRole = async (user: AppUser) => {
-    setUpdating(user.uid);
-    const newRole = user.role === 'admin' ? 'member' : 'admin';
-    await updateDoc(doc(db, 'users', user.uid), { role: newRole });
-    setUsers(prev => prev.map(u => u.uid === user.uid ? { ...u, role: newRole } : u));
+  const toggleRole = async (u: AppUser) => {
+    setUpdating(u.uid);
+    const newRole = u.role === 'admin' ? 'member' : 'admin';
+    const token = await auth.currentUser?.getIdToken();
+    const res = await fetch('/api/admin/set-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ uid: u.uid, role: newRole }),
+    });
+    if (res.ok) {
+      setUsers(prev => prev.map(x => x.uid === u.uid ? { ...x, role: newRole } : x));
+    }
     setUpdating(null);
   };
 

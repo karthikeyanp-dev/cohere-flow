@@ -1,4 +1,4 @@
-// app/globals.css
+/* app/globals.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
@@ -15,12 +15,6 @@
   --brand: #6366f1;
   --brand-hover: #4f46e5;
   --brand-glow: rgba(99,102,241,0.3);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html, body {

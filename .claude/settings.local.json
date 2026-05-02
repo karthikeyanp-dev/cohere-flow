@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js|json|css|rules|yml\\)$|middleware\")",
+      "Bash(awk '{print $9}')",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d.get\\('project_id','unknown'\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(node -e \"const d=require\\('/d/PromptWars/cohere-flow/service-account-key.json'\\); console.log\\(Object.keys\\(d\\)\\);\")",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(del middleware.ts)"
+    ]
+  }
+}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   DndContext, DragEndEvent, DragStartEvent,
   closestCenter, PointerSensor, useSensor, useSensors, DragOverlay,
+  MeasuringStrategy,
 } from '@dnd-kit/core';
 import { Project, Task } from '@/types';
 import Column from './Column';
@@ -61,6 +62,8 @@ export default function KanbanBoard({ project, tasks, onCreateTask, onUpdateTask
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        autoScroll={false}
+        measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
       >
         <div className="flex gap-4 overflow-x-auto pb-4 flex-1" style={{ minHeight: 0 }}>
           {sortedStages.map((stage) => (

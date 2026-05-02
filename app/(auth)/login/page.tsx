@@ -19,9 +19,9 @@ export default function LoginPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (user && !authLoading) {
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,11 +57,6 @@ export default function LoginPage() {
     );
   }
 
-  // If user is already logged in, redirect (this is a fallback)
-  if (user) {
-    router.push('/dashboard');
-    return null;
-  }
 
   return (
     <div className="glass rounded-2xl p-8 animate-fade-in">

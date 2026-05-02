@@ -19,9 +19,9 @@ export default function RegisterPage() {
   // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (user && !authLoading) {
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
 
   // If we're waiting for auth state, show loading
   if (authLoading) {
@@ -30,12 +30,6 @@ export default function RegisterPage() {
         <Loader2 size={32} className="animate-spin" style={{ color: 'var(--brand)' }} />
       </div>
     );
-  }
-
-  // If user is already logged in, redirect (this is a fallback)
-  if (user) {
-    router.push('/dashboard');
-    return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

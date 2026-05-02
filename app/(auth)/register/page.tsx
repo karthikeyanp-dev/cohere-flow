@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
-  const { signUp, signInWithGoogle } = useAuth();
+  const { signUp, signInWithGoogle, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,27 +16,52 @@ export default function RegisterPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
+  // If we're waiting for auth state, show loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+        <Loader2 size={32} className="animate-spin" style={{ color: 'var(--brand)' }} />
+      </div>
+    );
+  }
+
+  // If user is already logged in, redirect (this is a fallback)
+  if (user) {
+    router.push('/dashboard');
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setError(''); setLoading(true);
     try {
       await signUp(email, password, name);
-      router.push('/dashboard');
+      // onAuthStateChanged will handle the redirect
     } catch (err: any) {
       setError(err.code === 'auth/email-already-in-use'
         ? 'An account with this email already exists.'
         : 'Failed to create account. Please try again.');
-    } finally { setLoading(false); }
+      setLoading(false);
+    }
   };
 
   const handleGoogle = async () => {
     setError(''); setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
-    } catch { setError('Google sign-in failed.'); }
-    finally { setGoogleLoading(false); }
+      // onAuthStateChanged will handle the redirect after auth state is confirmed
+    } catch {
+      setError('Google sign-in failed.');
+      setGoogleLoading(false);
+    }
   };
 
   const inputStyle = {
@@ -122,3 +147,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

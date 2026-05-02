@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, Loader2, Chrome } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,16 +16,22 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (user && !authLoading) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
       await signIn(email, password);
-      router.push('/dashboard');
+      // onAuthStateChanged will handle the redirect
     } catch (err: any) {
       setError(getFriendlyError(err.code));
-    } finally {
       setLoading(false);
     }
   };
@@ -35,13 +41,27 @@ export default function LoginPage() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      router.push('/dashboard');
+      // onAuthStateChanged will handle the redirect after auth state is confirmed
     } catch (err: any) {
       setError(getFriendlyError(err.code));
-    } finally {
       setGoogleLoading(false);
     }
   };
+
+  // If we're waiting for auth state, show loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
+        <Loader2 size={32} className="animate-spin" style={{ color: 'var(--brand)' }} />
+      </div>
+    );
+  }
+
+  // If user is already logged in, redirect (this is a fallback)
+  if (user) {
+    router.push('/dashboard');
+    return null;
+  }
 
   return (
     <div className="glass rounded-2xl p-8 animate-fade-in">
@@ -127,7 +147,8 @@ export default function LoginPage() {
             background: loading ? 'var(--bg-raised)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
             color: loading ? 'var(--text-muted)' : 'white',
             cursor: loading ? 'not-allowed' : 'pointer',
-          }}>
+          }}
+        >
           {loading ? <Loader2 size={16} className="animate-spin"/> : null}
           {loading ? 'Signing in…' : 'Sign In'}
         </button>
@@ -148,7 +169,8 @@ export default function LoginPage() {
           border: '1px solid var(--border)',
           color: 'var(--text-primary)',
           cursor: googleLoading ? 'not-allowed' : 'pointer',
-        }}>
+        }}
+      >
         {googleLoading ? <Loader2 size={16} className="animate-spin"/> : (
           <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

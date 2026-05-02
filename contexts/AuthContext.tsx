@@ -93,7 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     await signInWithPopup(auth, googleProvider);
-    // User doc created in onAuthStateChanged handler above
+    // Note: onAuthStateChanged handler will create user doc and update state
+    // The caller should wait for loading to become false before redirecting
   };
 
   const signOut = async () => {
